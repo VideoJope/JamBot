@@ -3,31 +3,36 @@ const {
     Attachment
 } = require('discord.js');
 
+const {
+    botToken,
+    ownerUserID
+} = require('./credentials.json');
+
+const {
+    prefix,
+    commandsChannelName
+} = require('./config.json');
+
 const ytdl = require("ytdl-core");
 
 const client = new Client();
 
-const token = 'NzIzOTU5NTYxMTEwOTQ1OTAy.Xu5RnQ.UBKIBPzvULftv-AfX84ldEn7ips';
-
-const commandsChannelID = '727016656718659604'; //ID do canal de comandos
-
-const PREFIX = '!';
-
-var servers = {}; //guarda os diferentes servers, cada um com suas filas de músicas
+var servers = {}; //armazena os diferentes servers, cada um com suas filas de músicas
 
 client.on('ready', () => {
-    console.log('Bot is online!');
+    console.log('JamBot is online!');
 });
+
 
 client.on('message', async message => {
     
-    let args = message.content.substring(PREFIX.length).split(" ");
+    let args = message.content.substring(prefix.length).split(" ");
 
     if(!servers[message.guild.id]){
         servers[message.guild.id] = {queue: []};
     }
 
-    if(message.channel.id != commandsChannelID) return;
+    if(message.channel.name != commandsChannelName) return;
 
 
     switch(args[0]){
@@ -35,6 +40,7 @@ client.on('message', async message => {
             message.reply('não.');
             break;
 
+        case 'flipcoin':
         case 'coinflip':
             if(Math.random() > 0.4) message.channel.send('Cara.')
             else message.channel.send('Coroa.');
@@ -118,6 +124,9 @@ client.on('message', async message => {
                     return message.channel.send('O bot já está tocando música em outro canal de voz.');
                 }
             } catch(err){
+                connection.disconnect();
+                playingMusic = false;
+                emptyQueue(server.queue);
                 return console.log(err);
             }
 
@@ -207,4 +216,4 @@ function emptyQueue(queueToEmpty){
     }
 }
 
-client.login(token);
+client.login(botToken);
